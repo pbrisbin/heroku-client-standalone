@@ -10,7 +10,6 @@ license=('MIT')
 depends=(ruby)
 conflicts=(heroku-client heroku-toolbelt)
 source=("https://s3.amazonaws.com/assets.heroku.com/$_pkgname/$_pkgname-$pkgver.tgz")
-md5sums=('f2a504e40a55f81a95dc27687b8ea062')
 
 package() {
   mkdir -p "$pkgdir"/opt/heroku-client
@@ -20,4 +19,4 @@ package() {
   ln -s ../../opt/heroku-client/bin/heroku .
 }
 
-# vim:set ts=2 sw=2 et:
+md5sums=('f2a504e40a55f81a95dc27687b8ea062')
