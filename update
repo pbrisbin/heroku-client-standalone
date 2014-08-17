@@ -1,0 +1,65 @@
+#!/bin/sh
+#
+# pbrisbin 2014 - automatically check if there's a newer version of this package
+# available. If so, modify the PKGBUILD and re-submit accordingly.
+#
+###
+set -e
+
+latest="https://s3.amazonaws.com/assets.heroku.com/heroku-client/heroku-client.tgz"
+version_rb='heroku-client/lib/heroku/version.rb'
+
+get_latest_version() {
+  {
+    curl -# "$latest" | tar xzOf - "$version_rb"
+    printf "puts Heroku::VERSION\n"
+  } | ruby
+}
+
+prompt() {
+  local msg="$1" ans
+
+  printf "%s [y/n]? " "$msg"
+  read ans
+
+  case "$ans" in
+    Y|y) return 0 ;;
+    *)   return 1 ;;
+  esac
+}
+
+current_version="$(sed '/^pkgver=\(.*\)$/!d; s//\1/g' PKGBUILD)"
+latest_version="$(get_latest_version)"
+
+printf "Current: %s\n" "$current_version"
+printf "Latest:  %s\n" "$latest_version"
+
+check="$(vercmp "$latest_version" "$current_version")"
+
+if [ "$check" -gt 0 ]; then
+  printf "Newer version available\n"
+  printf "Updating PKGBUILD...\n"
+
+  sed -i '/^md5sums=.*$/d
+    s/^pkgver=.*$/pkgver='"$latest_version"'/
+    s/^pkgrel=.*$/pkgrel=1/' PKGBUILD
+
+  makepkg -c -g >> PKGBUILD
+
+  git diff
+
+  if prompt "Commit"; then
+    git commit PKGBUILD -m "New version: $latest_version"
+    git tag -a -m "v$latest_version" "v$latest_version"
+  fi
+
+  if prompt "Submit"; then
+    mkaurball
+    aur-submit "heroku-client-standalone-$latest_version-1.src.tar.gz"
+  fi
+
+  if prompt "Cleanup"; then
+    rm -v heroku-client-$latest_version.tgz
+    rm -v "heroku-client-standalone-$latest_version-1.src.tar.gz"
+  fi
+fi
