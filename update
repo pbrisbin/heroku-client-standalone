@@ -3,6 +3,8 @@
 # pbrisbin 2014 - automatically check if there's a newer version of this package
 # available. If so, modify the PKGBUILD and re-submit accordingly.
 #
+# License: WTFPL
+#
 ###
 set -e
 
