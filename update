@@ -62,4 +62,9 @@ if [ "$check" -gt 0 ]; then
     rm -v heroku-client-$latest_version.tgz
     rm -v "heroku-client-standalone-$latest_version-1.src.tar.gz"
   fi
+
+  if prompt "Test"; then
+    aurget -S --noconfirm heroku-client-standalone
+    heroku --version
+  fi
 fi
