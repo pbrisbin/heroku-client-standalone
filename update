@@ -52,7 +52,7 @@ if [ "$check" -gt 0 ]; then
 
   if prompt "Commit"; then
     git commit PKGBUILD -m "New version: $latest_version"
-    git tag -a -m "v$latest_version" "v$latest_version"
+    git tag -s -m "v$latest_version" "v$latest_version"
   fi
 
   if prompt "Submit"; then
