@@ -18,16 +18,12 @@ get_latest_version() {
   } | ruby
 }
 
-prompt() {
-  local msg="$1" ans
+submit_to_aur() {
+  local src="heroku-client-standalone-$latest_version-1.src.tar.gz"
 
-  printf "%s [y/n]? " "$msg"
-  read ans
+  mkaurball
 
-  case "$ans" in
-    Y|y) return 0 ;;
-    *)   return 1 ;;
-  esac
+  ( . .env && aur-submit "$src" )
 }
 
 current_version="$(sed '/^pkgver=\(.*\)$/!d; s//\1/g' PKGBUILD)"
@@ -48,25 +44,21 @@ if [ "$check" -gt 0 ]; then
 
   makepkg -c -g >> PKGBUILD
 
-  git diff
+  printf "Committing...\n"
+  git commit PKGBUILD -m "New version: $latest_version"
+  git tag -s -m "v$latest_version" "v$latest_version"
+  git show
 
-  if prompt "Commit"; then
-    git commit PKGBUILD -m "New version: $latest_version"
-    git tag -s -m "v$latest_version" "v$latest_version"
-  fi
+  printf "Submitting in 3...\n"; sleep 1
+  printf "              2...\n"; sleep 1
+  printf "              1...\n"; sleep 1
+  submit_to_aur
 
-  if prompt "Submit"; then
-    mkaurball
-    aur-submit "heroku-client-standalone-$latest_version-1.src.tar.gz"
-  fi
+  printf "Cleaning up...\n"
+  rm -v "heroku-client-$latest_version.tgz"
+  rm -v "heroku-client-standalone-$latest_version-1.src.tar.gz"
 
-  if prompt "Cleanup"; then
-    rm -v "heroku-client-$latest_version.tgz"
-    rm -v "heroku-client-standalone-$latest_version-1.src.tar.gz"
-  fi
-
-  if prompt "Test"; then
-    aurget -S --noconfirm heroku-client-standalone
-    heroku --version
-  fi
+  printf "Testing AUR installation...\n"
+  aurget -S --noconfirm heroku-client-standalone
+  heroku --version
 fi
