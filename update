@@ -23,7 +23,7 @@ submit_to_aur() {
 
   mkaurball
 
-  ( . .env && aur-submit "$src" )
+  ( . ./.env && aur-submit "$src" )
 }
 
 current_version="$(sed '/^pkgver=\(.*\)$/!d; s//\1/g' PKGBUILD)"
