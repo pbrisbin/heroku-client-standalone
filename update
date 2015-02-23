@@ -62,5 +62,10 @@ if [ "$check" -gt 0 ]; then
 
   printf "Testing AUR installation...\n"
   aurget -S --noconfirm heroku-client-standalone
-  heroku --version
+
+  if heroku --version | grep -Fq "heroku-toolbelt/$latest_version "; then
+    printf "All looks OK. Pushing to GitHub...\n"
+    git push
+    git push --tags
+  fi
 fi
