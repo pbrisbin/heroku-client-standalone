@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# pbrisbin 2015 rollback a bad update; assumes nothing's been pushed
+#
+# License: WTFPL
+#
+###
+set -e
+
+tag=$(git tag | sort --version-sort --reverse | head -1)
+
+if ! git ls-remote --tags origin | grep -qF "$tag"; then
+  git tag -d "$tag"
+fi
+
+git clean -fd
+git reset --hard origin/master
