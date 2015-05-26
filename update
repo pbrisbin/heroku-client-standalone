@@ -54,7 +54,12 @@ if [ "$check" -gt 0 ]; then
   printf "              3...\n"; sleep 1
   printf "              2...\n"; sleep 1
   printf "              1...\n"; sleep 1
-  submit_to_aur
+
+  if ! submit_to_aur; then
+    printf "Failed to submit, rolling back\n" >&2
+    ./rollback
+    exit 1
+  fi
 
   printf "Cleaning up...\n"
   rm -v "heroku-client-$latest_version.tgz"
